@@ -34,3 +34,7 @@ class Critic(object):
     @property
     def q_value(self):
         return self._q_value
+
+    @property
+    def state(self):
+        return self._state

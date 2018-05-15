@@ -4,20 +4,20 @@ import tensorlfow.contrib.layers as tfcl
 
 class Actor(object):
     def __init__(self, state_dim, scope="actor"):
-        self._dim = state_dim
+        with tf.variable_scope(scope):
+            self._dim = state_dim
 
-        self.state = tf.placeholder(tf.float32, state_dim, "actor_state_in")
-        self._action = self._model(scope)
+            self._state = tf.placeholder(tf.float32, state_dim, "actor_state_in")
+            self._action = self._model(scope)
 
-        self._trainable_vars = tf.trainable_variables(scope)
+            self._trainable_vars = tf.trainable_variables(scope)
 
     def _model(self, scope):
-        with tf.variable_scope(scope):
-            act = tf.nn.elu
-            initializer = tfcl.variance_scaling_initializer
-            x = tf.layers.dense(self.state, 256, act, kernel_initializer=initializer)
-            x = tf.layers.dense(x, 128, act, kernel_initializer=initializer)
-            action = tf.layers.dense(x, 1, None, kernel_initializer=initializer)
+        act = tf.nn.elu
+        initializer = tfcl.variance_scaling_initializer
+        x = tf.layers.dense(self._state, 256, act, kernel_initializer=initializer)
+        x = tf.layers.dense(x, 128, act, kernel_initializer=initializer)
+        action = tf.layers.dense(x, 1, None, kernel_initializer=initializer)
         return action
 
     @property
@@ -27,3 +27,7 @@ class Actor(object):
     @property
     def action(self):
         return self._action
+
+    @property
+    def state(self):
+        return self._state
