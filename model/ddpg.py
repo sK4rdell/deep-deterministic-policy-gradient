@@ -3,12 +3,15 @@ import numpy as np
 from model.actor import Actor
 from model.critic import Critic
 from model.exploration import Exploration
+from model.replay_buffer import ReplayBuffer
 
 
-class DDPG(Exploration):
+class DDPG(Exploration, ReplayBuffer):
     def __init__(self, init_std, final_std, action_dim, alpha, gamma=.99):
         Exploration.__init__(self, init_std, final_std)
+        ReplayBuffer.__init__(self)
         self.gamma = .99
+        #self.buffer = ReplayBuffer()
         self.sess = tf.Session()
 
         self._actor = Actor()
@@ -39,9 +42,7 @@ class DDPG(Exploration):
             self.update_actor = self._trainer.apply_gradients(
                 zip(actor_grads, self._actor.trainable_vars))
 
-    def action(self, state):
-        feed_dict = {self._actor.state: state}
-        return self.sess.run(self._actor._action, feed_dict=feed_dict)
+        self.sess.run(tf.global_variables_initializer())
 
     def __avg_critic_update(self, alpha=0.01):
         return [self._avg_critic.trainable_vars[i].assign(
@@ -59,9 +60,6 @@ class DDPG(Exploration):
         for i, r, q, t in enumerate(zip(rewards, q_vals, non_terminals)):
             td_targets[i] = r + self.gamma * q * t
         return td_targets
-
-    def sample_from_replay():
-        pass
 
     def _train_critic(self, _states, _actions, _rewards, _next_state, _terminals):
         feed_dict = {self._avg_critic.state: _next_state, self._avg_critic._action: _actions}
@@ -83,9 +81,13 @@ class DDPG(Exploration):
         feed_dict = {self._actor.state: state, self.action_grads: dq_da}
         self.sess.run(self.update_actor, feed_dict=feed_dict)
 
+    def action(self, state):
+        feed_dict = {self._actor.state: state}
+        return self.sess.run(self._actor._action, feed_dict=feed_dict)
+
     def train(self, batch_size=64):
 
-        _states, _actions, _rewards, _next_state, _terminals = self.sample_from_replay(batch_size)
+        _states, _actions, _rewards, _terminals, _next_state = self.sample_batch(batch_size)
 
         self._train_critic(_states, _actions, _rewards, _next_state, _terminals)
         self._train_actor(_states)

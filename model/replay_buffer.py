@@ -3,19 +3,18 @@ import random
 import numpy as np
 
 
-class ReplayBuffer:
+class ReplayBuffer(object):
 
-    def __init__(self, buffer_size=1.5*10**5, obs_size=2891):
+    def __init__(self, buffer_size=1.5*10**5):
 
         self._buffer_size = buffer_size
         self._count = 0
         self._buffer = deque(maxlen=int(buffer_size))
-        self._obs_size = obs_size
         self.a_dim, self.obs_dim = 0, 0
 
-    def add(self, transition):
+    def add_to_replay(self, transition):
         self._buffer.append(transition)
-        if self.a_dim = 0:
+        if self.a_dim == 0:
             self.a_dim = transition.action.shape()
             self.obs_dim = transition.state.shape()
 
