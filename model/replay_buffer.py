@@ -5,18 +5,15 @@ import numpy as np
 
 class ReplayBuffer(object):
 
-    def __init__(self, buffer_size=1.5*10**5):
+    def __init__(self, state_dim, action_dim, buffer_size=1.5*10**5):
 
         self._buffer_size = buffer_size
         self._count = 0
         self._buffer = deque(maxlen=int(buffer_size))
-        self.a_dim, self.obs_dim = 0, 0
+        self._a_dim, self._obs_dim = action_dim, state_dim
 
     def add_to_replay(self, transition):
         self._buffer.append(transition)
-        if self.a_dim == 0:
-            self.a_dim = transition.action.shape()
-            self.obs_dim = transition.state.shape()
 
     @property
     def buffer_size(self):
@@ -29,7 +26,7 @@ class ReplayBuffer(object):
         else:
             num_samples = batch_size
 
-        a = np.zeros(shape=[num_samples, self.a_dim])
+        a = np.zeros(shape=[num_samples, self._a_dim])
         r = np.zeros(shape=[num_samples, 1])
         t = np.zeros(shape=[num_samples, 1])
         s1 = np.zeros(shape=[num_samples, self._obs_dim])
