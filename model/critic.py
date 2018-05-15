@@ -32,9 +32,5 @@ class Critic(object):
         return self._trainable_vars
 
     @property
-    def action(self):
-        return self._action
-
-    @property
     def q_value(self):
         return self._q_value
