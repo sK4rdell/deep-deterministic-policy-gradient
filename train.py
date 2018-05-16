@@ -7,10 +7,11 @@ from model.ddpg import DDPG
 
 def main(env_name):
     env = gym.make(env_name)
-    model = DDPG(.2, .01, 1, 3, 1, .001, .99)
+    model = DDPG(init_std=.3, final_std=.05, action_dim=1, state_dim=3, alpha=.001, lr=1e-4)
 
     Transition = namedtuple("transition", ["obs1", "action", "reward", "terminal", "obs2"])
-
+    i = 0
+    actions = []
     while "it ain't over til it's over":
         terminal = False
         state = env.reset()
@@ -18,16 +19,25 @@ def main(env_name):
         while not terminal:
             env.render()
             a = model.action(np.reshape(state, [1, -1]))
+            actions.append(a)
             next_state, reward, terminal, _ = env.step(a)
+            reward /= 8
             model.add_to_replay(Transition(action=np.squeeze(a),
                                            obs1=np.squeeze(state),
                                            reward=reward,
-                                           terminal=terminal,
+                                           terminal=False,
                                            obs2=np.squeeze(next_state)))
             state = next_state
             ep_reward += reward
-            model.train()
-        print("Episode reward: ", ep_reward)
+            if i > 1:
+                avg_q = model.train()
+        model.decay_noise()
+        if i > 1:
+            print("Episode ", i, " reward: ", ep_reward.squeeze(), " average Q: ", avg_q,
+                  "mean a and std: ", np.mean(actions), np.std(actions))
+        else:
+            print("Episode ", i, " reward: ", ep_reward.squeeze())
+        i += 1
 
 
 if __name__ == '__main__':
