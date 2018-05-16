@@ -8,7 +8,7 @@ from model.ddpg import DDPG
 def main(env_name):
     env = gym.make(env_name)
     model = DDPG(init_std=.3, final_std=.05, action_dim=1, state_dim=3, alpha=.001, lr=1e-4)
-
+    model.init()
     Transition = namedtuple("transition", ["obs1", "action", "reward", "terminal", "obs2"])
     i = 0
     actions = []
@@ -21,7 +21,7 @@ def main(env_name):
             a = model.action(np.reshape(state, [1, -1]))
             actions.append(a)
             next_state, reward, terminal, _ = env.step(a)
-            reward /= 8
+            #reward /= 8
             model.add_to_replay(Transition(action=np.squeeze(a),
                                            obs1=np.squeeze(state),
                                            reward=reward,

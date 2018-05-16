@@ -7,11 +7,12 @@ from model.replay_buffer import ReplayBuffer
 
 
 class DDPG(Exploration, ReplayBuffer):
-    def __init__(self, init_std, final_std, action_dim, state_dim, alpha, batch_size=64, gamma=.99, lr=1e-4):
+    def __init__(self, init_std, final_std, action_dim, state_dim, alpha, batch_size=128,
+                 gamma=.99, lr=1e-4):
         Exploration.__init__(self, init_std, final_std, 1000)
         ReplayBuffer.__init__(self, state_dim, action_dim)
+        self.batch_size = batch_size
         self.gamma = .99
-        print("alpha. ", alpha)
         self.sess = tf.Session()
 
         self._actor = Actor(state_dim, action_dim)
@@ -22,6 +23,7 @@ class DDPG(Exploration, ReplayBuffer):
 
         self._critic = Critic(state_dim, action_dim)
         self._avg_critic = Critic(state_dim, action_dim, scope="avg_critic")
+
         self.update_avg_critic = self.__avg_params_update(
             self._critic.trainable_vars, self._avg_critic.trainable_vars)
 
@@ -37,9 +39,7 @@ class DDPG(Exploration, ReplayBuffer):
                 dtype=tf.float32, shape=[None, action_dim], name="action-grads")
 
             actor_grads = tf.gradients(
-                self._actor.action, self._actor.trainable_vars, grad_ys=self.action_grads)
-
-            actor_grads = list(map(lambda x: tf.div(x, batch_size), actor_grads))
+                ys=self._actor.action, xs=self._actor.trainable_vars, grad_ys=-self.action_grads)
 
         with tf.name_scope("optimizers"):
             self._critic_trainer = tf.train.AdamOptimizer(learning_rate=5 * lr)
@@ -50,9 +50,7 @@ class DDPG(Exploration, ReplayBuffer):
                 critic_loss, var_list=self._critic.trainable_vars)
 
             self.update_actor = self._actor_trainer.apply_gradients(
-                zip(actor_grads, self._actor.trainable_vars))
-
-        self.sess.run(tf.global_variables_initializer())
+                grads_and_vars=zip(actor_grads, self._actor.trainable_vars))
 
     def __avg_params_update(self, train_vars, avg_train_vars, alpha=0.01):
         return [avg_train_vars[i].assign(tf.multiply(train_vars[i], alpha) +
@@ -89,7 +87,7 @@ class DDPG(Exploration, ReplayBuffer):
         # get Q-values from average network
         action = self.sess.run(self._actor.action, feed_dict={self._actor.state: state})
         dq_da = self.sess.run(self._critic.dq_da, feed_dict={
-            self._critic.state: state, self._critic.action_placeholder: action})[0]
+            self._critic.state: state, self._critic.action_placeholder: action})
 
         feed_dict = {self._actor.state: state, self.action_grads: dq_da}
         self.sess.run([self.update_actor, self.update_avg_actor], feed_dict=feed_dict)
@@ -97,15 +95,17 @@ class DDPG(Exploration, ReplayBuffer):
     def action(self, state):
         feed_dict = {self._actor.state: state}
         a = self.sess.run(self._actor._action, feed_dict=feed_dict)
-
         a += self.exploration_noise()
         return a
 
-    def train(self, batch_size=64):
+    def train(self):
 
-        _states, _actions, _rewards, _terminals, _next_state = self.sample_batch(batch_size)
+        _states, _actions, _rewards, _terminals, _next_state = self.sample_batch(self.batch_size)
 
         avg_q = self._train_critic(_states, _actions, _rewards, _next_state, _terminals)
         self._train_actor(_states)
 
         return avg_q
+
+    def init(self):
+        self.sess.run(tf.global_variables_initializer())

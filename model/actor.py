@@ -18,12 +18,12 @@ class Actor(object):
     def _model(self, scope):
         act = tf.nn.elu
         initializer = tfcl.variance_scaling_initializer()
-        out_init = tfcl.variance_scaling_initializer(0.2)
-        x = tf.layers.dense(self._state, 256, act, kernel_initializer=initializer)
-        x = tf.layers.dense(x, 128, act, kernel_initializer=initializer)
+        out_init = tfcl.variance_scaling_initializer(factor=.1)
+        x = tf.layers.dense(self._state, 400, act, kernel_initializer=initializer)
+        x = tf.layers.dense(x, 300, act, kernel_initializer=initializer)
         action = tf.layers.dense(x, self.action_dim, tf.nn.tanh, kernel_initializer=out_init)
-        mean_act = tf.reduce_mean(self.action_bounds, keep_dims=True)
-        action_amp = tf.abs(self.action_bounds[0] - self.action_bounds[0])/2
+        mean_act = sum(self.action_bounds) / len(self.action_bounds)
+        action_amp = abs(self.action_bounds[1] - self.action_bounds[0])/2
         action = (action - mean_act) * action_amp
         return action
 

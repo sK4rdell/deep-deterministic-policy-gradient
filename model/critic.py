@@ -8,18 +8,19 @@ class Critic(object):
         self._state = tf.placeholder(tf.float32, [None, state_dim], "critic_state_in")
         self._action = tf.placeholder(tf.float32, [None, action_dim], "action_in")
         self._q_value = self._model(scope)
-        self._dq_da = tf.gradients(self._q_value, self._action)
+        self._dq_da = tf.gradients(self._q_value, self._action)[0]
         self._trainable_vars = tf.trainable_variables(scope)
 
     def _model(self, scope):
         with tf.variable_scope(scope):
+
             act = tf.nn.elu
             initializer = tfcl.variance_scaling_initializer()
-            xs = tf.layers.dense(self.state, 256, act, kernel_initializer=initializer)
-            xs = tf.layers.dense(xs, 128, None, kernel_initializer=initializer)
+            xs = tf.layers.dense(self.state, 400, act, kernel_initializer=initializer)
+            xs = tf.layers.dense(xs, 300, None, kernel_initializer=initializer)
 
-            xa = tf.layers.dense(self._action, 256, act, kernel_initializer=initializer)
-            xa = tf.layers.dense(xa, 128, None, kernel_initializer=initializer)
+            xa = tf.layers.dense(self._action, 400, act, kernel_initializer=initializer)
+            xa = tf.layers.dense(xa, 300, None, kernel_initializer=initializer)
 
             x = tf.nn.elu(xa + xs)
 
