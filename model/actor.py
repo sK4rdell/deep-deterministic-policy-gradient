@@ -3,7 +3,9 @@ import tensorflow.contrib.layers as tfcl
 
 
 class Actor(object):
-    """Attributes
+    """ Class for the Policy-network
+
+    Attributes
     ----------
     trainable_vars : List<Tensor>
         List of trainable variables
