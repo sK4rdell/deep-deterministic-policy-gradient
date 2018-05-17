@@ -9,7 +9,7 @@ class Exploration(object):
     exploration_noise
         sample from the exploration distribution.
     decsay_noise
-        Decrease the standard deviation of the xploration distribution.
+        Decrease the standard deviation of the exploration distribution.
     """
 
     def __init__(self, init_std, final_std, steps_to_decay=400):
@@ -18,7 +18,7 @@ class Exploration(object):
         Parameters
         ----------
         init_std : float
-            Starting standard deviation of the expåloration policy.
+            Starting standard deviation of the exploration policy.
         final_std : float
             Final standard deviation of the expåloration policy.
         steps_to_decay : int, optional
