@@ -4,8 +4,20 @@ import gym
 import numpy as np
 from model.ddpg import DDPG
 
+"""
+This module contains the code for training the DDPG-agent.
+"""
+
 
 def main(env_name):
+    """ Training loop for the DDPG model.
+
+    Parameters
+    ----------
+    env_name : string
+        name of the openAI gym evironment
+    """
+
     env = gym.make(env_name)
     model = DDPG(init_std=.3, final_std=.05, action_dim=1, state_dim=3, alpha=.001, lr=1e-4)
     model.init()
@@ -21,7 +33,6 @@ def main(env_name):
             a = model.action(np.reshape(state, [1, -1]))
             actions.append(a)
             next_state, reward, terminal, _ = env.step(a)
-            #reward /= 8
             model.add_to_replay(Transition(action=np.squeeze(a),
                                            obs1=np.squeeze(state),
                                            reward=reward,
