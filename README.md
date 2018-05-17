@@ -1,3 +1,14 @@
-# Deep Deterministic Policy Gradients with Hindsight Expereince Replay
+# Deep Deterministic Policy Gradients
 
-![alt](https://upload.wikimedia.org/wikipedia/en/4/4f/Under_construction.JPG)
+## Prerequisites
+
+```
+tensorflow --verison 1.8
+gym
+numpy
+```
+
+## Feature requests
+
+* Logging
+* Support for more than single dimensional action for exploraition
