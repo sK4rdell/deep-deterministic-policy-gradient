@@ -5,18 +5,28 @@ from model.critic import Critic
 from model.exploration import Exploration
 from model.replay_buffer import ReplayBuffer
 
-"""
-This module contains the DDPG class
-"""
-
 
 class DDPG(Exploration, ReplayBuffer):
-    """Implements the paper Deep Deterministic Policy Gradient algorithm 
-    https://arxiv.org/abs/1509.02971.
+    """Implements the paper Deep Deterministic Policy Gradient algorithm
+    https://arxiv.org/abs/1509.02971. Inherits from Exploraiton and ReplayBuffer.
+
+    Methods
+    -------
+    train
+        Performes a training step on the actor and the critic
+    add_to_replay
+        Add transition to replay buffer
+
     """
 
-    def __init__(self, init_std, final_std, action_dim, state_dim, alpha, batch_size=128,
-                 gamma=.99, lr=1e-4):
+    def __init__(self, init_std,
+                 final_std,
+                 action_dim,
+                 state_dim,
+                 alpha,
+                 batch_size=128,
+                 gamma=.99,
+                 lr=1e-4):
         """Builds up the graph and all neccesary operations for the model.
 
         Parameters
