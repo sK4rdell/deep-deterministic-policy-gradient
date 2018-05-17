@@ -3,7 +3,36 @@ import tensorflow.contrib.layers as tfcl
 
 
 class Critic(object):
+    """ Class for the Critic-network
+
+    Attributes
+    ----------
+    trainable_vars : List<Tensor>
+        List of trainable variables
+    action_placeholder : Tensorflow placeholder
+        Input to model
+    state: Tensorflow placeholder
+        Input to model
+    q_value: Tensor
+        Output of model
+    dq_da: Tensor
+        Gradient of Q wrt. action
+    """
+
     def __init__(self, state_dim, action_dim, scope="critic"):
+        """Builds the grah and all necessary operations for the critic
+
+        Parameters
+        ----------
+        state_dim : int
+            Dimensionality of the state.
+        action_dim : int
+            Dimensionality of the action.
+        scope : str, optional
+            variable scope for the network (the default is "critic")
+
+        """
+
         self._dim = state_dim
         self._state = tf.placeholder(tf.float32, [None, state_dim], "critic_state_in")
         self._action = tf.placeholder(tf.float32, [None, action_dim], "action_in")
@@ -12,6 +41,18 @@ class Critic(object):
         self._trainable_vars = tf.trainable_variables(scope)
 
     def _model(self, scope):
+        """Adds the critic network to the graph.
+
+        Parameters
+        ----------
+        scope : string
+            variable scope
+        Returns
+        -------
+        Tensor
+            The output of the model, i.e. the Q-value.
+        """
+
         with tf.variable_scope(scope):
 
             act = tf.nn.elu
