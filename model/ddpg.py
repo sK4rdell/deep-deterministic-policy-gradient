@@ -166,7 +166,7 @@ class DDPG(Exploration, ReplayBuffer):
         # calculate Q-values from next state and action from avg-policy
         feed_dict = {self._avg_critic.state: next_state,
                      self._avg_critic.action_placeholder: action}
-        self.sess.run(self._avg_critic.q_value, feed_dict=feed_dict)
+        avg_q = self.sess.run(self._avg_critic.q_value, feed_dict=feed_dict)
 
         td_targets = self.calculate_td_targets(rewards, avg_q, terminals)
         feed_dict = {self._critic.state: states,
