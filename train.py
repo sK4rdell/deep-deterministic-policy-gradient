@@ -5,7 +5,7 @@ import numpy as np
 from model.ddpg import DDPG
 
 """
-This module contains the code for training the DDPG-agent.
+This module contains the code for training the DDPG-agent.dd
 """
 
 
@@ -23,7 +23,6 @@ def main(env_name):
     model.init()
     Transition = namedtuple("transition", ["obs1", "action", "reward", "terminal", "obs2"])
     i = 0
-    actions = []
     while "it ain't over til it's over":
         terminal = False
         state = env.reset()
@@ -31,7 +30,6 @@ def main(env_name):
         while not terminal:
             env.render()
             a = model.action(np.reshape(state, [1, -1]))
-            actions.append(a)
             next_state, reward, terminal, _ = env.step(a)
             model.add_to_replay(Transition(action=np.squeeze(a),
                                            obs1=np.squeeze(state),
@@ -41,14 +39,10 @@ def main(env_name):
             state = next_state
             ep_reward += reward
             if i > 1:
-                avg_q = model.train()
+                model.train()
         model.decay_noise()
-        if i > 1:
-            print("Episode ", i, " reward: ", ep_reward.squeeze(), " average Q: ", avg_q,
-                  "mean a and std: ", np.mean(actions), np.std(actions))
-        else:
-            print("Episode ", i, " reward: ", ep_reward.squeeze())
         i += 1
+        print("Episode ", i, " reward: ", ep_reward.squeeze())
 
 
 if __name__ == '__main__':
