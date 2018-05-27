@@ -3,12 +3,13 @@
 ## Prerequisites
 
 ```
-tensorflow --verison 1.8
+tensorflow --version 1.8
 gym
 numpy
 ```
 
-## Feature requests
+## Upcomming features
 
 * Logging
-* Support for more than single dimensional action for exploraition
+* Support for more than single a dimensional action for exploraition
+* Checkpoints
